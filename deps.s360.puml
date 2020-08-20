@@ -1,0 +1,11 @@
+@startuml
+title Highfive GChat bot
+
+node "Highfive GChat bot" as Highfive {
+}
+
+cloud GoogleChatBotAPI {
+}
+
+GoogleChatBotAPI --> Highfive : GChat events
+@enduml

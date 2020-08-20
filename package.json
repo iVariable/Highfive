@@ -1,0 +1,10 @@
+{
+  "name": "highfive-gchat-bot",
+  "version": "0.1.0",
+  "private": true,
+  "devDependencies": {
+    "serverless": "^1.75.1",
+    "serverless-plugin-aws-alerts": "^1.4.0",
+    "serverless-pseudo-parameters": "^2.4.0"
+  }
+}

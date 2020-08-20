@@ -1,0 +1,64 @@
+service: highfive-gchat-bot
+
+frameworkVersion: ">=1.28.0 <2.0.0"
+
+plugins:
+  - serverless-plugin-aws-alerts
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: ${opt:stage, self:custom.defaultStage}
+  logRetentionInDays: 14
+  profile: ${env:AWS_PROFILE}
+  memorySize: 256
+  timeout: 180
+  region: eu-west-1
+  stackTags:
+    version: ${opt:version, 'unknown'}
+    DTAP: ${self:provider.stage}
+    Application: ${self:service}
+#  environment:
+#    SRS_ENV: ${self:provider.stage}
+
+custom:
+  defaultStage: dev
+  alerts:
+    functionErrors:
+      period: 300
+    definitions:
+      functionErrors:
+        treatMissingData: notBreaching
+      functionInvocations:
+        treatMissingData: notBreaching
+    dashboards: false
+    alarms:
+      - functionThrottles
+      - functionErrors
+    #      - functionInvocations
+    #      - functionDuration
+    topics:
+      alarm:
+        topic: ${self:service}-alarms-${self:provider.stage}
+        notifications: ${self:custom.alarms.${self:provider.stage}}
+  alarms:
+    dev:
+#      - endpoint: https://api.eu.opsgenie.com/v1/json/cloudwatch?apiKey=ca359485-af5f-43df-8470-14a021d16964
+#        protocol: https
+    prod:
+#      - endpoint: https://api.eu.opsgenie.com/v1/json/cloudwatch?apiKey=8c6a1fcf-9640-41b4-bbb0-a3ccf2dcf955
+#        protocol: https
+
+package:
+  individually: true
+  exclude:
+    - ./**
+#  include:
+#    - ./configs/**
+
+functions:
+
+#
+#resources:
+#  Resources:
