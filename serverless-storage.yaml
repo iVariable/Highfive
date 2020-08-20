@@ -1,0 +1,58 @@
+service: highfive-gchat-bot-storage
+
+frameworkVersion: ">=1.28.0 <2.0.0"
+
+plugins:
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: go1.x
+  stage: ${opt:stage, self:custom.defaultStage}
+  logRetentionInDays: 14
+  profile: ${env:AWS_PROFILE}
+  memorySize: 256
+  timeout: 180
+  region: eu-west-1
+  stackTags:
+    version: ${opt:version, 'unknown'}
+    DTAP: ${self:provider.stage}
+    Application: ${self:service}
+
+custom:
+  defaultStage: dev
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+resources:
+  Resources:
+    DerTisch:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: "Highfive-${self:provider.stage}"
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: Org
+            AttributeType: S
+
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        GlobalSecondaryIndexes:
+          - IndexName: Organisations
+            KeySchema:
+              - AttributeName: Org
+                KeyType: HASH
+              - AttributeName: PK
+                KeyType: RANGE
+            Projection:
+              ProjectionType: KEYS_ONLY
