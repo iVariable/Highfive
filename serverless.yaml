@@ -13,24 +13,52 @@ provider:
   logRetentionInDays: 14
   profile: ${env:AWS_PROFILE}
   memorySize: 256
-  timeout: 180
+  timeout: 30
   region: eu-west-1
   stackTags:
     version: ${opt:version, 'unknown'}
     DTAP: ${self:provider.stage}
     Application: ${self:service}
-#  environment:
-#    SRS_ENV: ${self:provider.stage}
+  environment:
+    ENV: ${self:provider.stage}
+  iamRoleStatements:
+#    - Effect: Allow
+#      Action:
+#        - "logs:CreateLogGroup"
+#        - "logs:DescribeLogGroups"
+#      Resource:
+#        - "arn:aws:logs:#{AWS::Region}:#{AWS::AccountId}:log-group:/sr-scrappers-${self:provider.stage}/*"
+#    - Effect: Allow
+#      Action:
+#        - "logs:CreateLogStream"
+#        - "logs:DescribeLogStreams"
+#      Resource:
+#        - "arn:aws:logs:#{AWS::Region}:#{AWS::AccountId}:log-group:/sr-scrappers-${self:provider.stage}/*:*"
+#    - Effect: Allow
+#      Action:
+#        - "logs:PutLogEvents"
+#      Resource:
+#        - "arn:aws:logs:#{AWS::Region}:#{AWS::AccountId}:log-group:/sr-scrappers-${self:provider.stage}/*:*:*"
+    - Effect: Allow
+      Action:
+        - "dynamodb:PutItem"
+        - "dynamodb:UpdateItem"
+        - "dynamodb:Query"
+      Resource:
+        - "arn:aws:dynamodb:#{AWS::Region}:#{AWS::AccountId}:table/Highfive-${self:provider.stage}"
 
 custom:
   defaultStage: dev
   alerts:
-    functionErrors:
-      period: 300
     definitions:
       functionErrors:
+        period: 300
+        treatMissingData: notBreaching
+      functionThrottles:
+        period: 300
         treatMissingData: notBreaching
       functionInvocations:
+        period: 300
         treatMissingData: notBreaching
     dashboards: false
     alarms:
@@ -54,11 +82,22 @@ package:
   individually: true
   exclude:
     - ./**
-#  include:
-#    - ./configs/**
+  include:
+    - ./configs/**
 
 functions:
-
+  bot:
+    handler: build/bot
+    package:
+      include:
+        - ./build/bot
+    environment:
+      STORAGE_TABLE_NAME: "Highfive-${self:provider.stage}"
+    events:
+      - http:
+          method: any
+          path: /v1/{proxy+}
+          cors: true
 #
 #resources:
 #  Resources:

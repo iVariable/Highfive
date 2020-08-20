@@ -56,3 +56,16 @@ resources:
                 KeyType: RANGE
             Projection:
               ProjectionType: KEYS_ONLY
+
+    GChatSecretKey:
+      Type: "AWS::SSM::Parameter"
+      Properties:
+        Name: '/Highfive/${self:provider.stage}/GChatSecretKey'
+        Description: "Highfive ${self:provider.stage} secrets"
+        Type: String
+        Value: DummyValuePleaseReplaceMeOnceDeployed
+
+  Outputs:
+    GChatSecretKeyParameter:
+      Description: GChat secret key
+      Value: !Ref GChatSecretKey
