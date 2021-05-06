@@ -30,6 +30,9 @@ func (a *Application) ProcessEvent(event *chat.DeprecatedEvent) (*chat.Message, 
 		return a.help(event)
 	}
 
+	evt := *event
+	a.Log.WithField(`event`, evt).WithField(`msg`, *evt.Message).Warn(`unknown/unsupported event`)
+
 	return a.UnknownCommand.Exec(event)
 }
 

@@ -44,6 +44,7 @@ func main() {
 		Log: log,
 		Commands: []bot.Command{
 			&commands.WelcomeToTheRoom{},
+			&commands.MeCommand{},
 			&commands.Praise{
 				PraiseStorage: storage,
 			},
